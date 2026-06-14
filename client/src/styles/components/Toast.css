@@ -1,0 +1,71 @@
+.toast-container {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 340px;
+  max-width: calc(100vw - 40px);
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  direction: rtl;
+  animation: toast-in 0.3s ease;
+  border-right: 4px solid transparent;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.toast-success { background: #f0fdf4; color: #166534; border-right-color: #22c55e; }
+.toast-error   { background: #fef2f2; color: #991b1b; border-right-color: #ef4444; }
+.toast-warning { background: #fffbeb; color: #92400e; border-right-color: #f59e0b; }
+.toast-info    { background: #eff6ff; color: #1e40af; border-right-color: #3b82f6; }
+
+.toast-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+
+.toast-message { flex: 1; line-height: 1.5; font-size: var(--font-sm); word-break: break-word; }
+
+/* תיקון כפתור X - גודל סביר ביחס להודעה */
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0.5;
+  padding: 2px 4px;
+  line-height: 1;
+  color: inherit;
+  flex-shrink: 0;
+  border-radius: 4px;
+  margin-top: 1px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--transition), background var(--transition);
+}
+.toast-close:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+
+@media (max-width: 480px) {
+  .toast-container {
+    top: auto;
+    bottom: 16px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+}

@@ -1,0 +1,82 @@
+.create-project {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+}
+
+.create-project h2 {
+  font-size: var(--font-xl);
+  color: var(--text-main);
+  margin-bottom: var(--space-lg);
+  font-weight: 800;
+}
+
+.create-project form {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.create-project input,
+.create-project textarea,
+.create-project select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-base);
+  font-family: inherit;
+  color: var(--text-main);
+  background: white;
+  box-sizing: border-box;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.create-project input:focus,
+.create-project textarea:focus,
+.create-project select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(118,75,162,0.12);
+}
+
+.create-project textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* כפתור שליחה */
+.create-project button[type="submit"],
+.create-project .btn-submit {
+  background: var(--gradient);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-base);
+  font-weight: 700;
+  cursor: pointer;
+  transition: box-shadow var(--transition), transform var(--transition);
+  align-self: flex-start;
+}
+.create-project button[type="submit"]:hover,
+.create-project .btn-submit:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+/* שדה label */
+.create-project label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 600px) {
+  .create-project { padding: var(--space-md); }
+  .create-project form { padding: var(--space-lg); }
+}

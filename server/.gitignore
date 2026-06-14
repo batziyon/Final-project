@@ -1,0 +1,7 @@
+node_modules
+.env
+uploads/profiles/*
+uploads/projects/*
+!uploads/profiles/.gitkeep
+!uploads/projects/.gitkeep
+server.log

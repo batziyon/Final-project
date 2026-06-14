@@ -1,0 +1,156 @@
+.landing-container {
+  direction: rtl;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+/* Hero */
+.hero {
+  background: var(--gradient);
+  padding: 80px 24px 100px;
+  text-align: center;
+  color: white;
+  position: relative;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.hero p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-buttons .btn-primary {
+  background: white;
+  color: var(--primary);
+  padding: 14px 32px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.cta-buttons .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+.cta-buttons .btn-secondary {
+  border: 2px solid rgba(255,255,255,0.8);
+  color: white;
+  background: transparent;
+  padding: 12px 30px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: all var(--transition);
+}
+.cta-buttons .btn-secondary:hover { background: rgba(255,255,255,0.15); border-color: white; }
+
+/* Stats */
+.stats-section {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 60px 24px;
+  background: var(--bg);
+}
+
+.stat-card {
+  text-align: center;
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 28px 40px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  min-width: 140px;
+}
+.stat-card h2 { color: var(--primary); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+.stat-card p { color: var(--text-muted); font-size: var(--font-sm); font-weight: 500; }
+
+/* How it works */
+.how-it-works {
+  padding: 60px 24px;
+  text-align: center;
+  background: white;
+}
+.how-it-works h2 { font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 40px; }
+
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.step {
+  background: var(--bg);
+  padding: 28px 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  width: 200px;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.step:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+.step-icon { font-size: 2rem; margin-bottom: 12px; }
+.step h3 { font-size: var(--font-md); color: var(--text-main); margin-bottom: 8px; font-weight: 700; }
+.step p { font-size: var(--font-sm); color: var(--text-muted); line-height: 1.5; }
+
+/* CTA bottom */
+.cta-section {
+  background: var(--gradient);
+  padding: 60px 24px;
+  text-align: center;
+  color: white;
+}
+.cta-section h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 24px; }
+
+.cta-button {
+  display: inline-block;
+  background: white;
+  color: var(--primary);
+  padding: 14px 36px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.cta-button:hover { transform: scale(1.04); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 1.9rem; }
+  .hero { padding: 60px 20px 70px; }
+  .steps { gap: 16px; }
+  .step { width: calc(50% - 8px); min-width: 140px; }
+  .stats-section { gap: 16px; padding: 40px 20px; }
+  .stat-card { padding: 20px 24px; }
+}
+
+@media (max-width: 480px) {
+  .step { width: 100%; }
+  .cta-buttons { flex-direction: column; align-items: center; }
+}

@@ -1,0 +1,39 @@
+.role-selector { display: flex; flex-direction: column; gap: 10px; }
+.role-selector-label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
+
+.role-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.role-chip {
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--border);
+    background: white;
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.role-chip:hover { border-color: var(--primary); color: var(--primary); }
+
+.role-chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.role-other-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-base);
+    font-family: inherit;
+    background: var(--primary-bg);
+    transition: border-color var(--transition);
+    box-sizing: border-box;
+}
+.role-other-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(118,75,162,0.1); }
