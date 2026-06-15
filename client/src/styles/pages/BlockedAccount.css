@@ -1,0 +1,71 @@
+.blocked-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: var(--space-md);
+}
+
+.blocked-card {
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--danger-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+  max-width: 440px;
+  width: 100%;
+  box-shadow: var(--shadow-md);
+}
+
+.blocked-icon { font-size: 3.5rem; margin-bottom: var(--space-md); }
+
+.blocked-card h1 {
+  color: var(--danger);
+  font-size: var(--font-xl);
+  margin-bottom: var(--space-sm);
+}
+
+.blocked-card p {
+  color: var(--text-secondary);
+  font-size: var(--font-base);
+  margin-bottom: var(--space-lg);
+}
+
+.blocked-contact {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.blocked-contact span {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+}
+
+.blocked-email {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: var(--font-base);
+  text-decoration: none;
+  word-break: break-all;
+}
+.blocked-email:hover { text-decoration: underline; }
+
+.btn-logout {
+  padding: 0.7rem 2rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-base);
+  font-weight: 600;
+  transition: all var(--transition);
+}
+.btn-logout:hover { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }

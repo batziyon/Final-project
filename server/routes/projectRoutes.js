@@ -27,7 +27,6 @@ router.get('/:projectId/members', verifyToken, projectCtrl.getProjectMembers);
 // ── בקשות הצטרפות ────────────────────────────────
 router.post('/apply',              verifyToken, applicationCtrl.applyToProject);
 router.post('/handle-application', verifyToken, applicationCtrl.handleApplication);
-router.post('/approve',            verifyToken, applicationCtrl.handleApplication);
 router.get('/:id/applications',    verifyToken, applicationCtrl.getProjectApplications);
 
 // ── תפקידים ──────────────────────────────────────

@@ -20,6 +20,14 @@ const authLimiter = rateLimit({
     legacyHeaders: false
 });
 
+const adminLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 40,
+    message: { message: 'יותר מדי בקשות מנהל. נסה שוב בעוד דקה.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -34,7 +42,7 @@ app.use('/api/auth/register', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects', taskRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminLimiter, adminRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
@@ -45,6 +53,8 @@ app.listen(PORT, async () => {
   try {
     await db.query('SELECT 1');
     logger.info('החיבור ל-MySQL הצליח!');
+    // מאפשר admin_id = NULL עבור אירועי מערכת (ניסיון כניסה של משתמש חסום)
+    await db.query('ALTER TABLE admin_audit_log MODIFY admin_id INT NULL').catch(() => {});
   } catch (error) {
     logger.error(`שגיאה בחיבור ל-MySQL: ${error.message}`);
   }

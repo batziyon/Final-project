@@ -17,10 +17,11 @@ const audit = async (adminId, action, targetType, targetId, details = '') => {
 exports.getStats = async (req, res) => {
     try {
         const [
-            [[users]], [[projects]], [[applications]], [[tasks]], [[admins]]
+            [[users]], [[projects]], [[applications]], [[pendingApplications]], [[tasks]], [[admins]]
         ] = await Promise.all([
             db.query('SELECT COUNT(*) as cnt FROM users'),
             db.query('SELECT COUNT(*) as cnt FROM projects'),
+            db.query('SELECT COUNT(*) as cnt FROM applications'),
             db.query('SELECT COUNT(*) as cnt FROM applications WHERE status = "pending"'),
             db.query('SELECT COUNT(*) as cnt FROM tasks'),
             db.query('SELECT COUNT(*) as cnt FROM users WHERE role = "admin"'),
@@ -28,7 +29,8 @@ exports.getStats = async (req, res) => {
         res.json({
             users: users.cnt,
             projects: projects.cnt,
-            pendingApplications: applications.cnt,
+            applications: applications.cnt,
+            pendingApplications: pendingApplications.cnt,
             tasks: tasks.cnt,
             admins: admins.cnt,
         });
@@ -159,7 +161,7 @@ exports.getAllApplications = async (req, res) => {
     try {
         const [apps] = await db.query(
             `SELECT a.id, a.status, a.created_at, a.reason,
-                    u.username as applicant_name,
+                    u.id as applicant_id, u.username as applicant_name,
                     p.title as project_title, p.id as project_id
              FROM applications a
              JOIN users u ON a.user_id = u.id
@@ -173,13 +175,53 @@ exports.getAllApplications = async (req, res) => {
     }
 };
 
-// ── 9. שליפת Audit Log ───────────────────────────────────────────────────
+// ── 9. פרופיל מלא של משתמש (Admin Read-Only) ────────────────────────────
+exports.getUserProfile = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const [[user]] = await db.query(
+            `SELECT id, username, email, role, is_active, bio, profile_image, created_at
+             FROM users WHERE id = ?`, [userId]
+        );
+        if (!user) return res.status(404).json({ message: 'משתמש לא נמצא' });
+
+        const [skills] = await db.query(
+            'SELECT skill_name FROM user_skills WHERE user_id = ?', [userId]
+        );
+        const [projects] = await db.query(
+            `SELECT p.id, p.title, p.category, p.status,
+                    CASE WHEN p.owner_id = ? THEN 'owner' ELSE 'member' END as relation
+             FROM projects p
+             LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = ?
+             WHERE p.owner_id = ? OR pm.user_id = ?
+             ORDER BY p.created_at DESC`, [userId, userId, userId, userId]
+        );
+        const [applications] = await db.query(
+            `SELECT a.id, a.status, a.reason, a.created_at, p.title as project_title
+             FROM applications a JOIN projects p ON a.project_id = p.id
+             WHERE a.user_id = ? ORDER BY a.created_at DESC`, [userId]
+        );
+
+        res.json({
+            ...user,
+            skills: skills.map(s => s.skill_name),
+            projects,
+            applications,
+        });
+    } catch (error) {
+        logger.error(`שגיאה בשליפת פרופיל: ${error.message}`);
+        res.status(500).json({ message: 'שגיאה בשרת' });
+    }
+};
+
+// ── 10. שליפת Audit Log ───────────────────────────────────────────────────
 exports.getAuditLog = async (req, res) => {
     try {
         const [logs] = await db.query(
-            `SELECT al.*, u.username as admin_name
+            `SELECT al.*, COALESCE(u.username, 'מערכת') as admin_name
              FROM admin_audit_log al
-             JOIN users u ON al.admin_id = u.id
+             LEFT JOIN users u ON al.admin_id = u.id
              ORDER BY al.created_at DESC LIMIT 100`
         );
         res.json(logs);

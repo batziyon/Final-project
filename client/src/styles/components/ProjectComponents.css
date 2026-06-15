@@ -169,7 +169,80 @@
 .application-card a { color: var(--primary); font-size: var(--font-sm); }
 .application-card a:hover { text-decoration: underline; }
 
-.application-actions { display: flex; gap: var(--space-sm); margin-top: var(--space-md); }
+.application-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+.application-card-header strong { font-size: var(--font-base); color: var(--text-main); }
+
+.app-date { font-size: var(--font-xs); color: var(--text-muted); margin-bottom: var(--space-sm); }
+
+.application-actions { display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap; }
+
+/* ── Candidate Profile View ── */
+.candidate-profile-view { display: flex; flex-direction: column; gap: var(--space-md); direction: rtl; }
+
+.candidate-profile-back { margin-bottom: var(--space-sm); }
+
+.candidate-profile-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.candidate-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.candidate-header h3 { font-size: var(--font-xl); color: var(--text-main); margin-bottom: 4px; }
+.candidate-joined { font-size: var(--font-xs); color: var(--text-muted); margin-top: 2px; }
+
+.candidate-role-tag {
+  display: inline-block;
+  font-size: var(--font-xs);
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.candidate-section {
+  margin-bottom: var(--space-md);
+}
+.candidate-section label {
+  display: block;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.candidate-section p { font-size: var(--font-sm); color: var(--text-secondary); line-height: 1.6; }
+
+.candidate-stats {
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  justify-content: center;
+}
+.candidate-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.stat-num { font-size: var(--font-xl); font-weight: 700; color: var(--primary); }
+.stat-label { font-size: var(--font-xs); color: var(--text-muted); }
 
 /* ── TeamTab ── */
 .team-tab h3 { font-size: var(--font-lg); margin-bottom: var(--space-md); }

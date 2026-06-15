@@ -18,7 +18,7 @@ const Dashboard = () => {
     const profileFields = [user?.bio, user?.skills?.length, user?.profile_image !== 'default_profile.png'];
     const profileComplete = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
-    const fetchDashboard = async () => {
+    const fetchDashboard = useCallback(async () => {
         try {
             const res = await api.get('/projects/dashboard-stats');
             setStats(res.data);
@@ -27,9 +27,9 @@ const Dashboard = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    useEffect(() => { fetchDashboard(); }, []);
+    useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
     const handleCreateProject = async (formData) => {
         try {
@@ -51,6 +51,15 @@ const Dashboard = () => {
 
     return (
         <div className="db-wrapper">
+            {String(user?.role).toLowerCase() === 'admin' && (
+                <div className="db-admin-banner">
+                    <div>
+                        <h3>⭐ שלום מנהל מערכת</h3>
+                        <p>יש לך גישה מלאה ללוח הניהול. לחץ למטה כדי לעבור למסך הניהול.</p>
+                    </div>
+                    <button className="db-btn-secondary" onClick={() => navigate('/admin')}>לוח ניהול</button>
+                </div>
+            )}
             <div className="db-header">
                 <div className="db-header-right">
                     <UserAvatar username={user?.username} image={profileImageUrl} size={60} className="db-avatar" />

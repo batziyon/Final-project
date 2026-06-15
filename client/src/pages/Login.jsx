@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -8,20 +8,36 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || '/dashboard';
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const { showError } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user?.role?.toLowerCase() === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       await login(email, password);
-      navigate(from, { replace: true });
-    } catch {
-      showError("אימייל או סיסמה שגויים");
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      if (storedUser?.role?.toLowerCase() === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
+    } catch (error) {
+      if (error.response?.status === 403) {
+        navigate('/blocked', { replace: true });
+      } else {
+        const message = error.response?.data?.message || "אימייל או סיסמה שגויים";
+        showError(message);
+      }
     } finally {
       setLoading(false);
     }

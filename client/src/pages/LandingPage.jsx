@@ -3,33 +3,52 @@ import api from '../services/api';
 import { Link } from 'react-router-dom';
 import '../styles/pages/LandingPage.css';
 
+// ============================================================
+// PLACEHOLDER: החלף כאן את קישור הסרטון האמיתי
+// קובץ: client/src/pages/LandingPage.jsx  שורה: 8
+// ============================================================
+const VIDEO_URL_PLACEHOLDER = 'https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE';
+
 export default function LandingPage() {
     const [stats, setStats] = useState({ users: 0, projects: 0, teamMembers: 0 });
 
     useEffect(() => {
-      api.get('/projects/stats')
+        api.get('/projects/stats')
             .then(res => setStats(res.data))
-            .catch(err => console.log("שגיאה בטעינת סטטיסטיקות:", err));
+            .catch(() => {});
     }, []);
 
     return (
         <div className="landing-container">
-            {/* Hero Section */}
+            {/* Hero */}
             <section className="hero">
                 <h1>ProjectMatch: המקום בו רעיונות פוגשים צוותים</h1>
                 <p>מצא את השותפים המושלמים לפרויקט החלומות שלך, גייס כישרונות ובנה את העתיד ביחד.</p>
-                
                 <div className="cta-buttons">
                     <Link to="/register" className="btn-primary">הירשם עכשיו</Link>
                     <Link to="/login" className="btn-secondary">התחברות</Link>
                 </div>
 
+                {/* Video Section */}
                 <div className="demo-video">
-                    <div className="video-placeholder">🎥 סרטון הדגמה של המערכת</div>
+                    {VIDEO_URL_PLACEHOLDER.includes('YOUR_VIDEO_ID_HERE') ? (
+                        <div className="video-placeholder">
+                            🎥 סרטון הדגמה של המערכת
+                            <small>החלף את VIDEO_URL_PLACEHOLDER בקובץ LandingPage.jsx שורה 8</small>
+                        </div>
+                    ) : (
+                        <iframe
+                            className="video-iframe"
+                            src={VIDEO_URL_PLACEHOLDER}
+                            title="סרטון הדגמה"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    )}
                 </div>
             </section>
 
-            {/* Stats Section - שימוש בנתונים מהשרת */}
+            {/* Stats */}
             <section className="stats-section">
                 <div className="stat-card">
                     <h2>{stats.users}+</h2>

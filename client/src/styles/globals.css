@@ -68,6 +68,17 @@ input, textarea, select {
 .btn-sm { padding: 6px 14px; font-size: var(--font-sm); }
 .btn-lg { padding: 14px 28px; font-size: var(--font-lg); }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-full { width: 100%; }
+
+.skill-tag {
+  display: inline-block;
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
 
 .card {
   background: var(--bg-card);

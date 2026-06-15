@@ -15,4 +15,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  response => response,
+  (error) => {
+    const status = error.response?.status;
+    const message = error.response?.data?.message || '';
+    if (status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    } else if (status === 403 && message.includes('חסום')) {
+      window.location.href = "/blocked";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

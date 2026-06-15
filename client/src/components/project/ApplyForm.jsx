@@ -1,5 +1,5 @@
-// ApplyForm.jsx
 import React, { useState } from 'react';
+import { useSuccessSound } from '../../hooks/useSuccessSound';
 import '../../styles/components/ProjectComponents.css';
 
 const ApplyForm = ({ onApplySubmit, roles = [] }) => {
@@ -8,12 +8,15 @@ const ApplyForm = ({ onApplySubmit, roles = [] }) => {
     const [formData, setFormData] = useState({ reason: '', experience: '', portfolio: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const playSuccess = useSuccessSound();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
         setIsSubmitting(true);
         try {
             await onApplySubmit({ ...formData, selectedRole });
+            playSuccess();
             setFormData({ reason: '', experience: '', portfolio: '' });
             setSelectedRole('');
         } catch (err) { console.error(err); }

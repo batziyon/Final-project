@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -17,25 +17,21 @@ function Navbar() {
   const [showOlder, setShowOlder] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // טעינת התראות בטעינת הקומפוננטה
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await api.get('/projects/notifications');
+      setNotifications(res.data);
+    } catch (err) {
+      console.error('שגיאה בטעינת התראות:', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
-
-   // בתוך ה-Navbar.jsx
-const fetchNotifications = async () => {
-    try {
-        const res = await api.get('/projects/notifications');
-        setNotifications(res.data);
-    } catch (err) {
-        console.error("שגיאה בטעינת התראות:", err);
-    }
-};
-
-    fetchNotifications(); // משיכה ראשונית
-    const interval = setInterval(fetchNotifications, 30000); // משיכה כל 30 שניות
-
-    return () => clearInterval(interval); // ניקוי ה-interval כשהקומפוננטה יורדת
-  }, [user]);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user, fetchNotifications]);
 
   const handleBellClick = async () => {
     const opening = !showDropdown;
@@ -65,6 +61,7 @@ const fetchNotifications = async () => {
       <div className={`nav-links ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)}>
         <Link to="/dashboard">דשבורד</Link>
         <Link to="/projects">גילוי פרויקטים</Link>
+        {String(user?.role).toLowerCase() === 'admin' && <Link to="/admin">ניהול</Link>}
         <Link to={`/profile/${user?.username}`}>הפרופיל שלי</Link>
       </div>
 

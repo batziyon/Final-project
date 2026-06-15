@@ -4,6 +4,33 @@ const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { deleteOldProfileImage } = require('../middleware/uploadMiddleware');
 
+const auditLog = async (action, targetId, details = '') => {
+    try {
+        await db.query(
+            'INSERT INTO admin_audit_log (admin_id, action, target_type, target_id, details) VALUES (NULL, ?, "user", ?, ?)',
+            [action, targetId, details]
+        );
+    } catch (e) {
+        logger.error(`Audit log error: ${e.message}`);
+    }
+};
+
+// --- 👤 0. שליפת משתמש נוכחי (לצורך וולידציית session) ---
+exports.getMe = async (req, res) => {
+    try {
+        const [[user]] = await db.query(
+            'SELECT id, username, email, role, bio, profile_image, is_active FROM users WHERE id = ?',
+            [req.user.id]
+        );
+        if (!user) return res.status(404).json({ message: 'משתמש לא נמצא' });
+        const [userSkills] = await db.query('SELECT skill_name FROM user_skills WHERE user_id = ?', [user.id]);
+        res.json({ ...user, skills: userSkills.map(s => s.skill_name) });
+    } catch (error) {
+        logger.error(`getMe error: ${error.message}`);
+        res.status(500).json({ message: 'שגיאה בשרת' });
+    }
+};
+
 // --- 📝 1. פונקציית הרשמה (Register) ---
 exports.register = async (req, res) => {
     try {
@@ -63,13 +90,85 @@ exports.register = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
     try {
         const [users] = await db.query(
-            'SELECT id, username, role, bio, profile_image FROM users WHERE username = ?',
+            'SELECT id, username, role, bio, profile_image, is_active, created_at FROM users WHERE username = ?',
             [req.params.username]
         );
         if (!users.length) return res.status(404).json({ message: 'המשתמש לא נמצא' });
-        const [userSkills] = await db.query('SELECT skill_name FROM user_skills WHERE user_id = ?', [users[0].id]);
-        res.json({ ...users[0], skills: userSkills.map(s => s.skill_name) });
+        const u = users[0];
+        const [[userSkills], projects] = await Promise.all([
+            db.query('SELECT skill_name FROM user_skills WHERE user_id = ?', [u.id]),
+            (async () => {
+                try {
+                    const [rows] = await db.query(
+                        `SELECT p.id, p.title, p.category, p.status,
+                                (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) + 1 as member_count,
+                                CASE WHEN p.owner_id = ? THEN 'owner' ELSE 'member' END as relation
+                         FROM projects p
+                         LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = ?
+                         WHERE (p.owner_id = ? OR pm.user_id = ?) AND p.is_hidden = 0
+                         ORDER BY p.created_at DESC`,
+                        [u.id, u.id, u.id, u.id]
+                    );
+                    return rows;
+                } catch (e) {
+                    logger.warn(`getUserProfile projects query failed: ${e.message}`);
+                    return [];
+                }
+            })()
+        ]);
+        res.json({ ...u, skills: userSkills.map(s => s.skill_name), projects });
     } catch (error) {
+        logger.error(`getUserProfile error: ${error.message}`);
+        res.status(500).json({ message: 'שגיאה בשרת' });
+    }
+};
+
+// --- 👁️ 2b. פרופיל ציבורי לפי ID (לבעל פרויקט שצופה במועמד) ---
+exports.getCandidateProfile = async (req, res) => {
+    try {
+        const viewerId = req.user.id;
+        const candidateId = parseInt(req.params.userId);
+
+        // בדוק שהצופה הוא בעל פרויקט שהמועמד הגיש אליו
+        const [authCheck] = await db.query(
+            `SELECT a.id FROM applications a
+             JOIN projects p ON p.id = a.project_id
+             WHERE a.user_id = ? AND p.owner_id = ? LIMIT 1`,
+            [candidateId, viewerId]
+        );
+        if (!authCheck.length) {
+            return res.status(403).json({ message: 'אין הרשאה לצפות בפרופיל זה' });
+        }
+
+        const [users] = await db.query(
+            'SELECT id, username, role, bio, profile_image, created_at FROM users WHERE id = ?',
+            [candidateId]
+        );
+        if (!users.length) return res.status(404).json({ message: 'המשתמש לא נמצא' });
+        const u = users[0];
+
+        const [[userSkills], [projects]] = await Promise.all([
+            db.query('SELECT skill_name FROM user_skills WHERE user_id = ?', [u.id]),
+            db.query(
+                `SELECT p.id, p.title, p.category, p.status,
+                        (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) + 1 as member_count,
+                        CASE WHEN p.owner_id = ? THEN 'owner' ELSE 'member' END as relation
+                 FROM projects p
+                 LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = ?
+                 WHERE (p.owner_id = ? OR pm.user_id = ?) AND p.is_hidden = 0
+                 ORDER BY p.created_at DESC`,
+                [u.id, u.id, u.id, u.id]
+            )
+        ]);
+
+        res.json({
+            ...u,
+            skills: userSkills.map(s => s.skill_name),
+            projects,
+            active_projects: projects.filter(p => p.status === 'active').length,
+        });
+    } catch (error) {
+        logger.error(`getCandidateProfile error: ${error.message}`);
         res.status(500).json({ message: 'שגיאה בשרת' });
     }
 };
@@ -86,6 +185,12 @@ exports.login = async (req, res) => {
         }
 
         const user = users[0];
+        if (user.is_active !== 1) {
+            const attemptTime = new Date().toLocaleString('he-IL');
+            await auditLog('BLOCKED_LOGIN_ATTEMPT', user.id, `ניסיון כניסה בשעה ${attemptTime}`);
+            logger.warn(`🚫 ניסיון כניסה של משתמש חסום: ${user.username} (ID: ${user.id})`);
+            return res.status(403).json({ message: 'החשבון חסום. לא ניתן להתחבר.' });
+        }
 
         // אימות סיסמה
         const isMatch = await bcrypt.compare(password, user.password);
@@ -117,6 +222,7 @@ exports.login = async (req, res) => {
                 role: user.role,
                 bio: user.bio,
                 profile_image: user.profile_image,
+                is_active: user.is_active,
                 skills: skillsArray
             }
         });

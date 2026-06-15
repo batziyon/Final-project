@@ -15,6 +15,7 @@ router.get('/stats', ...guard, adminController.getStats);
 
 // ── משתמשים ─────────────────────────────────────────────────────────────────
 router.get('/users',                        ...guard, adminController.getAllUsers);
+router.get('/users/:userId/profile',        ...guard, adminController.getUserProfile);
 router.put('/users/:userId/toggle',         ...guard, adminController.toggleUserStatus);
 router.put('/users/:userId/role',           ...guard, adminController.changeUserRole);
 

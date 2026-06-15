@@ -5,13 +5,14 @@ const maturityLabel = { idea: 'רעיון 💡', mvp: 'MVP 🔧', active: 'פע�
 const statusLabel = { recruiting: '🟢 מגייס', in_progress: '🔵 בתהליך', completed: '✅ הושלם' };
 
 const ProjectHeader = ({ project }) => {
-    const hasImage = !!project.media_url;
+    const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const hasImage = !!project.media_url && ['jpg','jpeg','png','gif','webp'].some(ext => project.media_url.endsWith(ext));
 
     return (
         <div className={`project-header ${hasImage ? 'with-image' : 'no-image'}`}>
             {hasImage ? (
                 <div className="cover-container">
-                    <img src={`http://localhost:5000${project.media_url}`} alt="Project Cover" className="cover-img" />
+                    <img src={`${API_BASE}${project.media_url}`} alt="Project Cover" className="cover-img" />
                     <div className="cover-overlay">
                         <div className="header-info-overlay">
                             <h1>{project.title}</h1>

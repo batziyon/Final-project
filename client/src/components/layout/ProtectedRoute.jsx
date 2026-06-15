@@ -9,7 +9,11 @@ function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (role && user.role !== role) {
+  if (user.is_active === 0) {
+    return <Navigate to="/blocked" replace />;
+  }
+
+  if (role && String(user.role).toLowerCase() !== String(role).toLowerCase()) {
     return <Navigate to="/dashboard" replace />;
   }
 
