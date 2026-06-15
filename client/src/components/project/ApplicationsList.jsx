@@ -7,7 +7,7 @@ import { useToast } from '../../context/ToastContext';
 import api from '../../services/api';
 import '../../styles/components/ProjectComponents.css';
 
-const roleLabel = { creator: '👑 יוצר', admin: '👮 מנהל', listener: '🔍 מחפש' };
+const roleLabel = { creator: '👑 יוצר', admin: '👮 מנהל' };
 
 const ApplicationsList = ({ applications, projectId, onUpdate }) => {
     const { showSuccess, showError } = useToast();

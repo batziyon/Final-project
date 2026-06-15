@@ -5,7 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { Loader, EmptyState, Badge, Button } from '../components/common';
 import '../styles/pages/AdminDashboard.css';
 
-const roleLabel = { creator: '👑 יוצר', listener: '🔍 מחפש', admin: '👮 מנהל' };
+const roleLabel = { creator: '👑 יוצר', admin: '👮 מנהל' };
 const appStatusLabel = { pending: '⏳ ממתין', approved: '✅ אושר', rejected: '❌ נדחה' };
 const appStatusVariant = { pending: 'secondary', approved: 'success', rejected: 'danger' };
 

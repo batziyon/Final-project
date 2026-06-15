@@ -7,7 +7,7 @@ import '../styles/pages/LandingPage.css';
 // PLACEHOLDER: החלף כאן את קישור הסרטון האמיתי
 // קובץ: client/src/pages/LandingPage.jsx  שורה: 8
 // ============================================================
-const VIDEO_URL_PLACEHOLDER = 'https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE';
+const VIDEO_URL_PLACEHOLDER = '/sounds/20260615-1917-59.2483222.mp4';
 
 export default function LandingPage() {
     const [stats, setStats] = useState({ users: 0, projects: 0, teamMembers: 0 });

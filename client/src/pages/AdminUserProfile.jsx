@@ -4,7 +4,7 @@ import api from '../services/api';
 import { Loader, Badge, Button } from '../components/common';
 import '../styles/pages/AdminUserProfile.css';
 
-const roleLabel = { creator: '👑 יוצר', listener: '🔍 מחפש', admin: '👮 מנהל' };
+const roleLabel = { creator: '👑 יוצר', admin: '👮 מנהל' };
 const statusLabel = { pending: '⏳ ממתין', approved: '✅ אושר', rejected: '❌ נדחה' };
 
 const AdminUserProfile = () => {

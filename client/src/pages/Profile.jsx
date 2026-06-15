@@ -8,7 +8,7 @@ import { Badge, Button } from '../components/common';
 import api from '../services/api';
 import '../styles/pages/Profile.css';
 
-const roleLabel = { creator: '👑 יוצר פרויקטים', admin: '👮 מנהל מערכת', listener: '🔍 מחפש פרויקטים' };
+const roleLabel = { creator: '👑 יוצר פרויקטים', admin: '👮 מנהל מערכת' };
 const appStatusVariant = { pending: 'secondary', approved: 'success', rejected: 'danger' };
 const appStatusLabel = { pending: '⏳ ממתין', approved: '✅ אושר', rejected: '❌ נדחה' };
 
@@ -126,11 +126,10 @@ const Profile = () => {
           <div className="form-group">
             <label>כישורים</label>
             <div className="profile-skills">
-              {profile.skills.map((s, i) => (
-                <span key={i} className="skill-tag">
-                  {s.startsWith('אחר:') ? s.replace('אחר:', '') : s}
-                </span>
-              ))}
+              {profile.skills.map((s, i) => {
+                const label = s.startsWith('אחר:') ? s.replace('אחר:', '') : s;
+                return <span key={i} className="skill-tag">{label}</span>;
+              })}
             </div>
           </div>
         )}

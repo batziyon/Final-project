@@ -1,7 +1,15 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║         adminController.js — בקר פאנל ניהול מערכת           ║
+// ║  כל ה-endpoints כאן מוגנים: חייבים JWT תקין + role=admin.   ║
+// ║  הגנה כפולה: authMiddleware + isAdmin middleware ב-routes.   ║
+// ╚══════════════════════════════════════════════════════════════╝
+
 const db = require('../config/db');
 const logger = require('../utils/logger.js');
 
-// ── Audit Log helper ────────────────────────────────────────────────────────
+// ── פונקציית עזר: כתיבה ל-Audit Log ─────────────────────────────────────────
+// כל פעולת מנהל (חסימה, שינוי תפקיד, מחיקה) נרשמת אוטומטית
+// adminId = מי ביצע | action = מה עשה | targetType = על מה | targetId = על איזה ID
 const audit = async (adminId, action, targetType, targetId, details = '') => {
     try {
         await db.query(
@@ -13,19 +21,22 @@ const audit = async (adminId, action, targetType, targetId, details = '') => {
     }
 };
 
-// ── 1. סטטיסטיקות ──────────────────────────────────────────────────────────
+// ── 1. סטטיסטיקות מערכת (/api/admin/stats) ──────────────────────────────────
+// מחזיר מספרים לכרטיסיות בדשבורד המנהל (משתמשים, פרויקטים, בקשות...)
+// 6 COUNT שאילתות רצות במקביל עם Promise.all — הרבה יותר מהיר מסדרתי
 exports.getStats = async (req, res) => {
     try {
         const [
             [[users]], [[projects]], [[applications]], [[pendingApplications]], [[tasks]], [[admins]]
         ] = await Promise.all([
-            db.query('SELECT COUNT(*) as cnt FROM users'),
-            db.query('SELECT COUNT(*) as cnt FROM projects'),
-            db.query('SELECT COUNT(*) as cnt FROM applications'),
-            db.query('SELECT COUNT(*) as cnt FROM applications WHERE status = "pending"'),
-            db.query('SELECT COUNT(*) as cnt FROM tasks'),
-            db.query('SELECT COUNT(*) as cnt FROM users WHERE role = "admin"'),
+            db.query('SELECT COUNT(*) as cnt FROM users'),                                      // סה"כ משתמשים
+            db.query('SELECT COUNT(*) as cnt FROM projects'),                                   // סה"כ פרויקטים
+            db.query('SELECT COUNT(*) as cnt FROM applications'),                               // סה"כ בקשות
+            db.query('SELECT COUNT(*) as cnt FROM applications WHERE status = "pending"'),      // בקשות ממתינות
+            db.query('SELECT COUNT(*) as cnt FROM tasks'),                                      // סה"כ משימות
+            db.query('SELECT COUNT(*) as cnt FROM users WHERE role = "admin"'),                 // מנהלי מערכת
         ]);
+        // מחזיר אובייקט עם כל המספרים — הקליינט ממפה אותם לכרטיסיות
         res.json({
             users: users.cnt,
             projects: projects.cnt,
@@ -40,7 +51,9 @@ exports.getStats = async (req, res) => {
     }
 };
 
-// ── 2. שליפת כל המשתמשים ──────────────────────────────────────────────────
+// ── 2. שליפת כל המשתמשים (/api/admin/users) ──────────────────────────────────
+// מחזיר רשימה לתצוגת הטבלה בדשבורד — ממוין מהחדש לישן
+// לא מחזיר סיסמאות! SELECT מגדיר בדיוק אילו עמודות
 exports.getAllUsers = async (req, res) => {
     try {
         const [users] = await db.query(
@@ -54,17 +67,22 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
-// ── 3. חסימה / שחרור משתמש ────────────────────────────────────────────────
+// ── 3. חסימה / שחרור משתמש (/api/admin/users/:userId/toggle) ─────────────────
+// isActive: 1 = פעיל, 0 = חסום
+// מנהל לא יכול לחסום את עצמו — בדיקת בטיחות
 exports.toggleUserStatus = async (req, res) => {
     try {
-        const { userId } = req.params;
-        const { isActive } = req.body;
+        const { userId } = req.params; // ה-ID מה-URL
+        const { isActive } = req.body;  // 0 או 1 מהקליינט
 
+        // מניעת self-lock — מנהל לא יכול לנעול את עצמו
         if (parseInt(userId) === req.user.id) {
             return res.status(400).json({ message: 'לא ניתן לחסום את עצמך' });
         }
 
         await db.query('UPDATE users SET is_active = ? WHERE id = ?', [isActive, userId]);
+
+        // תיעוד הפעולה: BLOCK_USER או UNBLOCK_USER עם הערה על הסטטוס החדש
         await audit(req.user.id, isActive ? 'UNBLOCK_USER' : 'BLOCK_USER', 'user', userId,
             `is_active → ${isActive}`);
 
@@ -76,16 +94,19 @@ exports.toggleUserStatus = async (req, res) => {
     }
 };
 
-// ── 4. שינוי תפקיד משתמש ──────────────────────────────────────────────────
+// ── 4. שינוי תפקיד משתמש (/api/admin/users/:userId/role) ─────────────────────
+// validRoles מגדיר אילו תפקידים קיימים — listener הוסר מהמערכת
 exports.changeUserRole = async (req, res) => {
     try {
         const { userId } = req.params;
         const { role } = req.body;
 
-        const validRoles = ['listener', 'creator', 'admin'];
+        // ולידציה: רק תפקידים מוכרים
+        const validRoles = ['creator', 'admin'];
         if (!validRoles.includes(role)) {
             return res.status(400).json({ message: 'תפקיד לא תקין' });
         }
+        // מניעת self-role-change
         if (parseInt(userId) === req.user.id) {
             return res.status(400).json({ message: 'לא ניתן לשנות את תפקידך' });
         }
@@ -94,6 +115,8 @@ exports.changeUserRole = async (req, res) => {
         if (!current.length) return res.status(404).json({ message: 'משתמש לא נמצא' });
 
         await db.query('UPDATE users SET role = ? WHERE id = ?', [role, userId]);
+
+        // תיעוד: "creator → admin" לדוגמה
         await audit(req.user.id, 'CHANGE_ROLE', 'user', userId,
             `${current[0].role} → ${role}`);
 
@@ -105,7 +128,8 @@ exports.changeUserRole = async (req, res) => {
     }
 };
 
-// ── 5. שליפת כל הפרויקטים ─────────────────────────────────────────────────
+// ── 5. שליפת כל הפרויקטים (/api/admin/projects) ─────────────────────────────
+// JOIN עם users כדי לקבל שם הבעלים בנוסף ל-id
 exports.getAllProjects = async (req, res) => {
     try {
         const [projects] = await db.query(
@@ -122,11 +146,12 @@ exports.getAllProjects = async (req, res) => {
     }
 };
 
-// ── 6. הסתרה / הצגה של פרויקט ────────────────────────────────────────────
+// ── 6. הסתרה / הצגה של פרויקט (/api/admin/projects/:projectId/visibility) ────
+// is_hidden = 1 → הפרויקט לא יופיע בחיפוש אבל לא נמחק
 exports.toggleProjectVisibility = async (req, res) => {
     try {
         const { projectId } = req.params;
-        const { isHidden } = req.body;
+        const { isHidden } = req.body; // true/false מהקליינט
 
         await db.query('UPDATE projects SET is_hidden = ? WHERE id = ?', [isHidden, projectId]);
         await audit(req.user.id, isHidden ? 'HIDE_PROJECT' : 'SHOW_PROJECT', 'project', projectId);
@@ -138,7 +163,8 @@ exports.toggleProjectVisibility = async (req, res) => {
     }
 };
 
-// ── 7. מחיקת פרויקט ───────────────────────────────────────────────────────
+// ── 7. מחיקת פרויקט (/api/admin/projects/:projectId) ────────────────────────
+// מחיקה מלאה מהמסד — שמים כותרת ב-audit log לפני המחיקה
 exports.deleteProject = async (req, res) => {
     try {
         const { projectId } = req.params;
@@ -146,6 +172,7 @@ exports.deleteProject = async (req, res) => {
         if (!proj.length) return res.status(404).json({ message: 'פרויקט לא נמצא' });
 
         await db.query('DELETE FROM projects WHERE id = ?', [projectId]);
+        // תיעוד כולל את שם הפרויקט שנמחק
         await audit(req.user.id, 'DELETE_PROJECT', 'project', projectId, proj[0].title);
 
         logger.warn(`👮 אדמין ${req.user.id} מחק פרויקט ${projectId}: ${proj[0].title}`);
@@ -156,7 +183,8 @@ exports.deleteProject = async (req, res) => {
     }
 };
 
-// ── 8. שליפת כל הבקשות ───────────────────────────────────────────────────
+// ── 8. שליפת כל הבקשות (/api/admin/applications) ────────────────────────────
+// JOIN כפול: users (למגיש) + projects (לשם הפרויקט)
 exports.getAllApplications = async (req, res) => {
     try {
         const [apps] = await db.query(
@@ -175,17 +203,21 @@ exports.getAllApplications = async (req, res) => {
     }
 };
 
-// ── 9. פרופיל מלא של משתמש (Admin Read-Only) ────────────────────────────
+// ── 9. פרופיל מלא של משתמש לצפייה (/api/admin/users/:userId/profile) ─────────
+// מחזיר הכל: פרטים, כישורים, פרויקטים, בקשות — לתצוגת AdminUserProfile
+// 3 שאילתות מקבילות אחרי שליפת המשתמש הראשית
 exports.getUserProfile = async (req, res) => {
     try {
         const { userId } = req.params;
 
+        // [[user]] — שליפה ישירה של אובייקט בודד (לא מערך)
         const [[user]] = await db.query(
             `SELECT id, username, email, role, is_active, bio, profile_image, created_at
              FROM users WHERE id = ?`, [userId]
         );
         if (!user) return res.status(404).json({ message: 'משתמש לא נמצא' });
 
+        // 3 שאילתות מקבילות: כישורים, פרויקטים, בקשות
         const [skills] = await db.query(
             'SELECT skill_name FROM user_skills WHERE user_id = ?', [userId]
         );
@@ -215,7 +247,9 @@ exports.getUserProfile = async (req, res) => {
     }
 };
 
-// ── 10. שליפת Audit Log ───────────────────────────────────────────────────
+// ── 10. שליפת Audit Log (/api/admin/audit-log) ───────────────────────────────
+// מחזיר 100 הפעולות האחרונות — LEFT JOIN כדי לכלול גם פעולות מערכת (admin_id=NULL)
+// COALESCE מחזיר 'מערכת' כשאין admin_id (ניסיון כניסה חסום = לא אדם ספציפי)
 exports.getAuditLog = async (req, res) => {
     try {
         const [logs] = await db.query(

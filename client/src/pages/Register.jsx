@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FaUser, FaEnvelope, FaLock, FaInfoCircle, FaUserTag } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaInfoCircle } from "react-icons/fa";
 import api from "../services/api";
 import SkillSelector from "../components/SkillSelector";
 import { useToast } from "../context/ToastContext";
@@ -9,7 +9,7 @@ import "../styles/pages/Register.css";
 function Register() {
   const navigate = useNavigate();
   const { showError } = useToast();
-  const [form, setForm] = useState({ username: "", email: "", password: "", bio: "", role: "listener" });
+  const [form, setForm] = useState({ username: "", email: "", password: "", bio: "", role: "creator" });
   const [profileImage, setProfileImage] = useState(null);
   const [skills, setSkills] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -88,13 +88,7 @@ function Register() {
             {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
           </div>
 
-          <div className="input-group">
-            <FaUserTag className="icon" />
-            <select value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))}>
-              <option value="listener">מחפש פרויקטים</option>
-              <option value="creator">יוצר פרויקטים</option>
-            </select>
-          </div>
+
 
           <div className="input-group">
             <FaInfoCircle className="icon" />

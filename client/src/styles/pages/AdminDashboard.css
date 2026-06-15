@@ -174,12 +174,27 @@
   .admin-stats { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: var(--space-sm); }
   .admin-stat-value { font-size: var(--font-xl); }
   .admin-stat-label { font-size: 0.65rem; }
+  .admin-header { flex-direction: column; align-items: flex-start; }
   .admin-header h1 { font-size: var(--font-lg); }
+  .admin-table-wrapper { border-radius: var(--radius-sm); }
 }
 
 @media (max-width: 480px) {
+  .admin-page, .admin-wrapper { padding: var(--space-sm); }
+  .admin-stats { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+  .admin-stat-card { padding: var(--space-sm); }
+  .admin-stat-value { font-size: var(--font-lg); }
+
+  /* טבלה גלילה אופקית במובייל */
+  .admin-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table { min-width: 480px; }
   .admin-table th, .admin-table td { padding: 8px 10px; font-size: var(--font-xs); }
-  .admin-actions-cell { flex-direction: column; align-items: flex-start; }
-  .admin-stats { grid-template-columns: repeat(2, 1fr); }
+
+  /* הסתרת עמודות פחות חשובות */
+  .admin-table th:nth-child(1),
+  .admin-table td:nth-child(1) { display: none; }
+
+  .admin-actions-cell { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .admin-header h1 { font-size: var(--font-md); }
 }
 

@@ -1,15 +1,19 @@
 .navbar {
   background: white;
-  height: var(--navbar-height);
   padding: 0 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   box-shadow: 0 2px 12px rgba(118,75,162,0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
   border-bottom: 1px solid var(--border-light);
+}
+
+.nav-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--navbar-height);
+  width: 100%;
 }
 
 .logo {
@@ -22,9 +26,11 @@
   flex-shrink: 0;
 }
 
+/* Desktop: לינקים בתוך nav-top-row, מוצגים רגיל */
 .nav-links {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .nav-links a {
@@ -66,7 +72,6 @@
   border: 2px solid var(--primary-bg);
 }
 
-/* כפתור התנתקות */
 .logout-btn {
   background: var(--danger-bg);
   color: var(--danger);
@@ -164,7 +169,7 @@
 }
 .notif-older-toggle:hover { background: var(--primary-bg); }
 
-/* המבורגר */
+/* המבורגר — מוסתר ב-desktop */
 .nav-hamburger {
   display: none;
   flex-direction: column;
@@ -186,33 +191,37 @@
 
 /* Mobile */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0 16px;
-    flex-wrap: wrap;
-    height: auto;
-    min-height: var(--navbar-height);
-  }
+  .navbar { padding: 0 16px; }
 
   .nav-hamburger { display: flex; }
 
+  /* הלינקים מתחבאים ומופיעים מתחת ל-top-row */
   .nav-links {
     display: none;
     width: 100%;
     flex-direction: column;
     gap: 4px;
-    padding: 12px 0;
+    padding: 8px 0 12px;
     border-top: 1px solid var(--border-light);
+    order: 10;
   }
   .nav-links.open { display: flex; }
+
+  /* nav-top-row עם flex-wrap כדי שהלינקים ירדו שורה */
+  .nav-top-row {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--navbar-height);
+    padding: 8px 0;
+  }
 
   .nav-links a {
     padding: 12px 16px;
     font-size: var(--font-md);
+    width: 100%;
   }
 
   .nav-actions { gap: 8px; }
-
   .nav-user-info span { display: none; }
-
   .logout-btn { padding: 7px 12px; font-size: var(--font-xs); }
 }
